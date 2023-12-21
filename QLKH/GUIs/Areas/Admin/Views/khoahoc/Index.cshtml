@@ -1,0 +1,227 @@
+﻿@{
+    ViewBag.Title = "Index";
+    Layout = "~/Areas/Admin/Views/Shared/_Layout.cshtml";
+}
+
+<div class="card">
+    <div class="card-header">
+        <h4>THÔNG TIN HỌC VIÊN</h4>
+    </div>
+    <div class="card-body">
+
+        <div class="row">
+            <div class="col-md-2">
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#new">
+                    Thêm mới
+                </button>
+            </div>
+            <div class="col-md-3">
+                <span>Số dòng/trang</span>
+            </div>
+            <div class="col-md-2">
+                @Html.DropDownList("Pagesize", new SelectList(ViewBag.Pagesize, "ID", "ID"), new { @class = "form-control" })
+            </div>
+            <div class="col-md-3">
+                <div class="dropdown" style="float:right">
+                    <select class="form-select" aria-label="Default select example" id="status">
+
+                        <option value="1">Đang dạy</option>
+                        <option value="0">Đã nghỉ</option>
+
+                    </select>
+                </div>
+            </div>
+        </div>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>
+                        STT
+                    </th>
+                    <th>
+                        Họ tên nhân viên
+                    </th>
+                    <th>
+                        Tuổi
+                    </th>
+                    <th>
+                        Địa chỉ
+                    </th>
+                    <th>
+                        Số ĐT
+                    </th>
+                    <th>
+                        Ngày vào làm
+                    </th>
+                    <th>
+                        Ảnh đại điện
+                    </th>
+                    <th> </th>
+                </tr>
+            </thead>
+
+            <tbody id="tbData"></tbody>
+            <tfoot>
+                <tr>
+                    <th colspan="100" id="pages">
+
+                    </th>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+
+
+@section scripts{
+    <script>
+        var khoahoc = {
+            init: function () {
+                khoahoc.search(1);
+                $("#search").change(function () {
+                    khoahoc.search(1);
+                });
+                $("#Pagesize").change(function () {
+                    khoahoc.search(1);
+                });
+                $("#status").change(function () {
+                    khoahoc.search(1);
+                });
+                $("#create").click(function () {
+                    khoahoc.create();
+                    khoahoc.search(1);
+                });
+                $('#update').on('show.bs.modal', function (event) {
+                    var button = $(event.relatedTarget)
+                    var id = button.data('whatever')
+
+                    khoahoc.getKhoahoc(id);
+
+                });
+                $("#save").click(function () {
+                    khoahoc.save();
+                    khoahoc.search(1);
+                });
+            },
+            search: function (index) {
+                var name = $("#search").val();
+                var status = $("#status").val();
+                if (name == null) name = "";
+                var size = $("#Pagesize").val();
+                var form = new FormData()
+                form.append("name", name);
+                form.append("status", status);
+                form.append("index", index);
+                form.append("size", size);
+                $.ajax({
+                    type: 'POST',
+                    dataType: 'Json',
+                    contentType: false,
+                    processData: false,
+                    data: form,
+                    url: '/Admin/khoahoc/ShowList/',
+                    success: function (res) {
+                        $("#tbData").html(res.data);
+                        $("#pages").html(res.page);
+                    },
+                    error: function () {
+                        alert("Co loi xay ra");
+                    }
+                });
+            },
+            create: function () {
+                var name = $("#name").val();
+                var giaovienid = $("#giaovienid").val();
+                var ngaybatdau = $("#ngaybatdau").val();
+                var ngayketthuc = $("#ngayketthuc").val();
+                var hoctudo = $("#hoctudo").val();
+                var icon = $("#icon").val();
+                var mota = $("#mota").val();
+                var trangthai = $("#trangthai").val();
+                var vip = $("#vip").val();
+                var form = new FormData()
+                form.append("name", name);
+                form.append("giaovienid", giaovienid);
+                form.append("ngaybatdau", ngaybatdau);
+                form.append("ngayketthuc", ngayketthuc);
+                form.append("hoctudo", hoctudo);
+                form.append("icon", icon);
+                form.append("mota", mota);
+                form.append("trangthai", trangthai);
+                form.append("vip", vip);
+                $.ajax({
+                    type: 'POST',
+                    dataType: 'Json',
+                    contentType: false,
+                    processData: false,
+                    data: form,
+                    url: '/Admin/khoahoc/Create/',//Duong dan API
+                    success: function (res) {
+
+                        _layout.showtoast(res.mess);
+                    },
+                });
+            },
+            getKhoahoc: function (id) {
+                $.ajax({
+                    type: 'get',
+                    dataType: 'JSON',
+                    url: '/Admin/khoahoc/getKhoahoc/' + id,
+                    success: function (res) {
+                        $("#edit_id").val(res.data.Id);
+                        $("#edit_name").val(res.data.Name);
+                        $("#edit_giaovienid").val(res.data.GiaovienId);
+                        $("#edit_ngaybatdau").val(res.data.Ngaytao);
+                        $("#edit_ngayketthuc").val(res.data.Ngaybatdau);
+                        $("#edit_hoctudo").val(res.data.Email);
+                        $("#edit_icon").val(res.data.Cos);
+                        $("#edit_mota").val(res.data.Code);
+                        $("#edit_trangthai").val(res.data.Trangthai);
+                        $("#edit_vip").val(res.data.Trangthai);
+                    }
+                });
+            },
+
+            save: function () {
+                var id = $("#edit_id").val();
+                var name = $("#edit_name").val();
+                var username = $("#edit_username").val();
+                var password = $("#edit_password").val();
+                var email = $("#edit_email").val();
+                var cos = $("#edit_cos").val();
+                var code = $("#edit_code").val();
+                var status = $("#edit_status").val();
+                var form = new FormData()
+                form.append("id", id);
+                form.append("name", name);
+                form.append("username", username);
+                form.append("password", password);
+                form.append("email", email);
+                form.append("cos", cos);
+                form.append("code", code);
+                form.append("status", status);
+
+                $.ajax({
+                    type: 'POST',
+                    dataType: 'Json',
+                    contentType: false,
+                    processData: false,
+                    data: form,
+                    url: '/Admin/khoahoc/Update/',
+                    success: function (res) {
+
+                        _layout.showtoast(res.mess);
+                    },
+                });
+            },
+
+
+
+        }
+        khoahoc.init();
+        function goto(i) {
+            khoahoc.search(i);
+        }
+    </script>
+}
+
